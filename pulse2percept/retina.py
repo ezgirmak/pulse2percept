@@ -22,7 +22,7 @@ class Grid(object):
                  eye='RE', sampling=25, n_axons=501, phi_range=(-180.0, 180.0),
                  n_rho=801, rho_range=(4.0, 45.0), loc_od=(15.5, 1.5),
                  sensitivity_rule='decay', contribution_rule='max',
-                 decay_const=2.0, alpha=14000, powermean_exp=None, datapath='.',
+                 decay_const=2.0, alpha=14000, edema_map, powermean_exp=None, datapath='.',
                  save_data=True, engine='joblib', scheduler='threading',
                  n_jobs=-1):
         """Generates a spatial grid representing the retinal coordinate frame
@@ -96,6 +96,9 @@ class Grid(object):
             constant of the exponential fall-off.
         alpha : float, optional, default: 14000
             Current spread parameter for passive current spread from the electrode.
+        edema_map : 2D array, optional, default: None
+            A 2D logical edema map that must have the same dimensions as the
+            `xg`, `yg` meshgrid.
         powermean_exp : float, optional, default: None
             When `sensitivity_rule` is set to 'mean', specifies the exponent of
             the generalized (power) mean function. The power mean is calculated
@@ -150,6 +153,7 @@ class Grid(object):
         self.engine = engine
         self.scheduler = scheduler
         self.n_jobs = n_jobs
+        self.edema_map = edema_map
 
         if np.abs(loc_od[1]) > 10.0:
             logging.getLogger(__name__).warn("The Jansonius model might "
@@ -279,12 +283,14 @@ class Grid(object):
 
         Returns
         -------
-        ecm: array
+        ecs: array
             The effective current spread, a time series of the same size as
             the current map, where each pixel is the dot product of the pixel
             values in ecm along the pixels in the list in axon_map, weighted
             by the weights axon map.
+
         """
+        #axonal contribution
         contrib = utils.parfor(axon_contribution, self.axon_distances,
                                func_args=[current_spread], engine=self.engine,
                                func_kwargs={
@@ -294,6 +300,8 @@ class Grid(object):
                                    'powermean_exp': self.powermean_exp
                                },
                                scheduler=self.scheduler, n_jobs=self.n_jobs)
+
+        #edema contribution
 
         ecs = np.zeros_like(current_spread)
         px_contrib = list(filter(None, contrib))
@@ -1194,7 +1202,26 @@ def axon_dist_from_soma(axon, xg, yg, tree=None):
 
     return idx_cs, dist
 
+def edema_contribution(current_spread, edema_map):
+    """ Determines the current spread under edema
+    Parameters
+    -----------
+    current_spread : 2D array
+        A 2D current spread map that must have the same dimensions as the
+        `xg`, `yg` meshgrid.
+    edema_map : 2D array
+        A 2D logical edema map that must have the same dimensions as the
+        `xg`, `yg` meshgrid
+    Returns
+    -------
+    ecs : 2D array
+        Effective current spread map after edema contributions
 
+    """
+    #for each location (x,y)
+        #if edema_map == 1
+        #current_spread(at that location) == max
+        #return
 def axon_contribution(axon_dist, current_spread, sensitivity_rule='decay',
                       contribution_rule='max', min_contribution=0.01,
                       decay_const=2.0, powermean_exp=None):
@@ -1228,6 +1255,8 @@ def axon_contribution(axon_dist, current_spread, sensitivity_rule='decay',
             sensitivity. See Figure 2 in Jeng, Tang, Molnar, Desai, and Fried
             (2011). The sodium channel band shapes the response to electric
             stimulation in retinal ganglion cells. J Neural Eng 8 (036022).
+        - 'edema':
+            If given location has edema, axon sensitivity is uniform.
     contribution_rule : {'max', 'sum', 'power-mean'}, optional, default: 'max'
         This rule specifies how the activation thresholds across all axon
         segments are combined to determine the contribution of the axon to the

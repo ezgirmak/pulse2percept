@@ -56,7 +56,7 @@ class Simulation(object):
                               n_rho=801, rho_range=(4.0, 45.0),
                               loc_od=(15.5, 1.5),
                               sensitivity_rule='decay', decay_const=1.0,
-                              alpha=14000, edema_loc=None, contribution_rule='max',
+                              alpha=14000, edema_map=None, contribution_rule='max',
                               powermean_exp=None, datapath='.', save_data=True):
         """Sets parameters of the optic fiber layer (OFL)
 
@@ -122,8 +122,8 @@ class Simulation(object):
             constant of the exponential fall-off.
         alpha : float, optional, default: 14000
             Current spread parameter for passive current spread from the electrode.
-        edema_loc : dict, optional, default: None
-            Locations of edemas in x,y coordinates. NEEDS TO BE TURNED INTOMESHGRID!
+        edema_map : 2D array, optional, default: None
+            Locations of edemas in a binary map where 1 represents edema.
         powermean_exp : float, optional, default: 1.0
             When `sensitivity_rule` is set to 'mean', specifies the exponent of
             the generalized (power) mean function. The power mean is calculated
@@ -182,18 +182,6 @@ class Simulation(object):
 
         if alpha <= 0:
             raise ValueError("alpha cannot be a negative value. ")
-
-        if edema_loc != None:
-            #IS THERE A BETTER WAY
-            num_x = int((xhi - xlo) / sampling + 1)
-            num_y = int((yhi - ylo) / sampling + 1)
-            self.gridx, self.gridy = np.meshgrid(np.linspace(xlo, xhi, num_x),
-                                                 np.linspace(ylo, yhi, num_y),
-                                                 indexing='xy')
-             #set up a 2D map of zeros
-             self.edema_map = np.zeros(self.gridx.shape[0], self.gridx.shape[1],
-                            2, len(implant.electrodes)), dtype=float)
-            #for each x,y loc make that meshgrid 1
 
 
         # Generate the grid from the above specs

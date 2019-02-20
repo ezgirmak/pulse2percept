@@ -97,8 +97,7 @@ class Grid(object):
         alpha : float, optional, default: 14000
             Current spread parameter for passive current spread from the electrode.
         edema_map : 2D array, optional, default: None
-            A 2D binary edema map that must have the same dimensions as the
-            `xg`, `yg` meshgrid.
+            A 2D binary edema map that must have the same dimensions as the `xg`, `yg` meshgrid.
         powermean_exp : float, optional, default: None
             When `sensitivity_rule` is set to 'mean', specifies the exponent of
             the generalized (power) mean function. The power mean is calculated
@@ -301,14 +300,15 @@ class Grid(object):
                                },
                                scheduler=self.scheduler, n_jobs=self.n_jobs)
 
-        1/0
+        #axonal contribution
         ecs = np.zeros_like(current_spread)
         px_contrib = list(filter(None, contrib))
         for idx, value in px_contrib:
             ecs.ravel()[idx] = value
 
         #edema contribution
-
+        ecs_edema = edema_contribution(current_spread, self.edema_map)
+        ecs = ecs + ecs_edema
         # Normalize so that the max of `ecs` is the same as `current_spread`
         return ecs / (ecs.max() + np.finfo(float).eps) * current_spread.max()
 
@@ -1219,10 +1219,11 @@ def edema_contribution(current_spread, edema_map):
         Effective current spread map after edema contributions
 
     """
-    #for each location (x,y)
-        #if edema_map == 1
-        #current_spread(at that location) == max
-        #return
+    idx = np.where(edema_map)
+    1/0
+    maxs = np.max(current_spread[idx])
+    ecs = maxs*current_spread
+    return ecs
 
 def axon_contribution(axon_dist, current_spread, sensitivity_rule='decay',
                       contribution_rule='max', min_contribution=0.01,

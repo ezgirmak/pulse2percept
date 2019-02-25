@@ -337,6 +337,7 @@ class Grid(object):
 
         cs = np.zeros((self.gridx.shape[0], self.gridx.shape[1],
                        2, len(implant.electrodes)), dtype=float)
+
         ecs = np.zeros((self.gridx.shape[0], self.gridx.shape[1],
                         2, len(implant.electrodes)), dtype=float)
 
@@ -1220,9 +1221,8 @@ def edema_contribution(current_spread, edema_map):
 
     """
     idx = np.where(edema_map)
-    1/0
     maxs = np.max(current_spread[idx])
-    ecs = maxs*current_spread
+    ecs = maxs*edema_map
     return ecs
 
 def axon_contribution(axon_dist, current_spread, sensitivity_rule='decay',

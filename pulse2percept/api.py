@@ -183,7 +183,7 @@ class Simulation(object):
         if alpha <= 0:
             raise ValueError("alpha cannot be a negative value. ")
 
-
+=
         # Generate the grid from the above specs
         self.ofl = retina.Grid(x_range=(xlo, xhi), y_range=(ylo, yhi),
                                eye=self.implant.eye, sampling=sampling,
@@ -469,11 +469,12 @@ class Simulation(object):
                 if 'INL' in layers:
                     # For this pixel: Check if the ecs in any layer is large
                     # enough compared to the max across pixels within the layer
-                    process_pixel |= np.any(ecs[yy, xx, 0, :] >=
-                                            tol * lmax[0, :])
+                    process_pixel |= np.any(ecs[yy, xx, 0, :]
+
+                                            >= tol * lmax[0, :])
                 if ('GCL' or 'OFL') in layers:
-                    process_pixel |= np.any(ecs[yy, xx, 1, :] >=
-                                            tol * lmax[1, :])
+                    process_pixel |= np.any(ecs[yy, xx, 1, :]
+                                            >= tol * lmax[1, :])
 
                 if process_pixel:
                     ecs_list.append(ecs[yy, xx])
@@ -487,8 +488,8 @@ class Simulation(object):
                                ecs_list, n_jobs=self.n_jobs,
                                engine=self.engine, scheduler=self.scheduler,
                                func_args=[pt_data, layers, self.use_jit])
-        bm = np.zeros(self.ofl.gridx.shape +
-                      (sr_list[0].data.shape[-1], ))
+        bm = np.zeros(self.ofl.gridx.shape
+                     + (sr_list[0].data.shape[-1], ))
         idxer = tuple(np.array(idx_list)[:, i] for i in range(2))
         bm[idxer] = [sr.data for sr in sr_list]
         percept = utils.TimeSeries(sr_list[0].tsample, bm)

@@ -7,17 +7,12 @@ This example shows how to build and visualize basic types of stimuli such as
 :py:class:`~pulse2percept.stimuli.MonophasicPulse`,
 :py:class:`~pulse2percept.stimuli.BiphasicPulse` or a
 :py:class:`~pulse2percept.stimuli.PulseTrain` for a given implant.
-
 A monophasic pulse has a single phase and can be either anodic (by definition:
 has a positive current amplitude) or cathodic (negative current amplitude).
-
 A biphasic pulse is generally charge-balanced for safety reasons (i.e., the
 net current must sum to zero over time) and defined as either anodic-first
 or cathodic-first.
-
 Multiple pulses can form a pulse train.
-
-
 """
 ##############################################################################
 # Simplest stimulus
@@ -141,13 +136,6 @@ ax.set_ylabel('Amplitude ($\mu$A)')
 monophasic_stim.data[0] = 10*monophasic_stim.data[0]
 print(monophasic_stim)
 
-<<<<<<< HEAD
-# OR
-# recreate the same stimulus with an amplitude 1 microAmps.
-pulse_type = 'anodic'
-monophasic_stim = Stimulus(source=MonophasicPulse(ptype=pulse_type,
-                           pdur=pulse_dur, tsample=time_sample))
-=======
 ###############################################################################
 # Or we can create a NumPy array and assign that to the data structure of the
 # stimulus:
@@ -157,7 +145,6 @@ monophasic_stim = Stimulus(MonophasicPulse(ptype='anodic', pdur=pulse_dur,
                                            delay_dur=delay_dur,
                                            stim_dur=stim_dur,
                                            tsample=time_step))
->>>>>>> 52eff66e18492e4621d399cb9cd2efc03e031877
 monophasic_stim.data[0] = 10*np.ones_like(monophasic_stim.data[0])
 print(monophasic_stim)
 
